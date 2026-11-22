@@ -1,4 +1,4 @@
-import { COLORS, drawAtom, labelPill, letter, roundRect } from "./draw";
+import { COLORS, drawAtom, drawMolecule, labelPill, letter, roundRect } from "./draw";
 import { progress, type Viz } from "./types";
 
 interface CleanState {
@@ -59,29 +59,13 @@ export const cleanViz: Viz<CleanState> = {
     ctx.ellipse(w * 0.18, h * 0.22, 10, 20, 0.6, 0, Math.PI * 2);
     ctx.fill();
 
-    if (step === 0) {
-      const clawX = w * 0.46;
-      const clawY = h * 0.2;
-      const arms = [-0.9, -0.15, 0.7];
-      ctx.strokeStyle = COLORS.c;
-      ctx.lineWidth = 3;
-      ctx.lineCap = "round";
-      for (const angle of arms) {
-        const ox = clawX + Math.cos(angle) * 28;
-        const oy = clawY + Math.sin(angle) * 22;
-        ctx.beginPath();
-        ctx.moveTo(clawX - 8, clawY);
-        ctx.lineTo(ox, oy);
-        ctx.stroke();
-        drawAtom(ctx, ox, oy, 8, COLORS.o);
-      }
-      drawAtom(ctx, clawX - 8, clawY, 10, COLORS.c);
-      letter(ctx, clawX - 8, clawY, "C", "#fffaf6", 9);
-      drawAtom(ctx, clawX + 36, clawY, 11, COLORS.ion);
-      letter(ctx, clawX + 36, clawY, "Cu", "#f5fbff", 8);
-      labelPill(ctx, w * 0.55, h * 0.38, "Citrate grips the copper", { w, h });
-    }
-
+    const citricScale = Math.min(w < 520 ? 0.42 : 0.5, (w * 0.62) / 250);
+    drawMolecule(ctx, "citric", w * (step === 0 ? 0.64 : 0.28), h * 0.2, {
+      scale: citricScale,
+      mode: input.detail,
+      caption: "Citric acid, C₆H₈O₇",
+      ink: "dark",
+    });
     if (step >= 1) {
       for (let i = 0; i < 4; i++) {
         const x = w * (0.42 + i * 0.1);

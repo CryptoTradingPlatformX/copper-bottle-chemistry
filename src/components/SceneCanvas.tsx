@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { fitCanvas } from "../viz/draw";
 import { VIZ, type VizId } from "../viz/registry";
+import type { AtomDetail } from "../viz/molecules";
 import type { Viz, VizInput } from "../viz/types";
 
 interface Props {
@@ -11,17 +12,18 @@ interface Props {
   sloshed: boolean;
   acidic: boolean;
   hours: number;
+  detail: AtomDetail;
   label: string;
 }
 
-export function SceneCanvas({ sceneId, step, playing, reduced, sloshed, acidic, hours, label }: Props) {
+export function SceneCanvas({ sceneId, step, playing, reduced, sloshed, acidic, hours, detail, label }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simRef = useRef<unknown>(null);
   const timeRef = useRef(0);
   const hoursRef = useRef(hours);
-  const propsRef = useRef({ step, playing, reduced, sloshed, acidic, sceneId });
+  const propsRef = useRef({ step, playing, reduced, sloshed, acidic, sceneId, detail });
   hoursRef.current = hours;
-  propsRef.current = { step, playing, reduced, sloshed, acidic, sceneId };
+  propsRef.current = { step, playing, reduced, sloshed, acidic, sceneId, detail };
 
   useEffect(() => {
     timeRef.current = reduced ? 8 : 0;
@@ -64,6 +66,7 @@ export function SceneCanvas({ sceneId, step, playing, reduced, sloshed, acidic, 
         sloshed: props.sloshed,
         acidic: props.acidic,
         hours: hoursRef.current,
+        detail: props.detail,
       };
       if (props.playing && !props.reduced) viz.tick(simRef.current, input);
       viz.draw(context, simRef.current, input);
@@ -121,7 +124,7 @@ export function SceneCanvas({ sceneId, step, playing, reduced, sloshed, acidic, 
       resize.disconnect();
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [sceneId, step, playing, reduced, sloshed, acidic, frozenHours]);
+  }, [sceneId, step, playing, reduced, sloshed, acidic, frozenHours, detail]);
 
   return (
     <div className="stage-frame">

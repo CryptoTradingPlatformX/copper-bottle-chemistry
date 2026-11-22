@@ -1,4 +1,4 @@
-import { COLORS, drawOxygen, drawWater, halo, labelPill, microscope, traceBottle, waterSites } from "./draw";
+import { COLORS, drawMolecule, drawOxygen, drawWater, halo, labelPill, microscope, traceBottle, waterSites } from "./draw";
 import { contain, grid, integrate, makeMolecule, separate, type Molecule, type Viz } from "./types";
 
 interface ZoomState {
@@ -110,16 +110,17 @@ export const zoomViz: Viz<ZoomState> = {
     state.h = h;
   },
   tick(state, input) {
-    const top = input.step >= 3 ? input.h * 0.34 : 8;
+    const top = input.step >= 3 ? input.h * 0.3 : 8;
+    const floor = input.step >= 1 ? input.h - (input.w < 520 ? 168 : 124) : input.h;
     for (const water of state.waters) {
       integrate(water, input.dt, 64);
-      contain(water, 0, top, input.w, input.h, 20);
+      contain(water, 0, top, input.w, floor, 20);
     }
     separate(state.waters, input.w < 520 ? 48 : 58);
-    for (const water of state.waters) contain(water, 0, top, input.w, input.h, 20);
+    for (const water of state.waters) contain(water, 0, top, input.w, floor, 20);
     if (input.step < 3) {
       integrate(state.oxygen, input.dt, 40);
-      contain(state.oxygen, 0, 8, input.w, input.h, 24);
+      contain(state.oxygen, 0, 8, input.w, floor, 24);
     }
     for (const molecule of state.air) {
       integrate(molecule, input.dt, 30);
@@ -188,16 +189,39 @@ export const zoomViz: Viz<ZoomState> = {
 
     let ox = state.oxygen.x;
     let oy = state.oxygen.y;
+    const bandTop = input.h - (input.w < 520 ? 168 : 124);
     if (input.step >= 3) {
       const p = input.reduced ? 0.72 : (input.time % 7) / 7;
       ox = input.w * (0.62 + Math.sin(input.time * 0.8) * 0.06);
-      oy = input.h * (0.1 + p * 0.62);
+      oy = Math.min(input.h * (0.34 + p * 0.28), bandTop - 28);
     }
     if (input.step >= 2) halo(ctx, ox, oy, 30, "rgba(243, 212, 138, 0.22)");
     drawOxygen(ctx, ox, oy, state.oxygen.angle + input.time * 0.2, 1.05);
 
-    if (input.step === 1) labelPill(ctx, input.w * 0.5, input.h - 22, "Dashed lines are hydrogen bonds", { w: input.w, h: input.h });
-    if (input.step === 2) labelPill(ctx, ox, oy - 36, "O₂, a separate molecule", { w: input.w, h: input.h });
+    if (input.step === 1) labelPill(ctx, input.w * 0.5, bandTop - 16, "Dashed lines are hydrogen bonds", { w: input.w, h: input.h });
+    if (input.step === 2) labelPill(ctx, ox, Math.max(36, oy - 36), "O₂, a separate molecule", { w: input.w, h: input.h });
     if (input.step >= 3) labelPill(ctx, input.w * 0.72, input.h * 0.2, "From the air", { w: input.w, h: input.h });
+    if (input.step >= 1) drawIonStrip(ctx, input.w, input.h, input.detail);
   },
 };
+
+function drawIonStrip(ctx: CanvasRenderingContext2D, w: number, h: number, detail: "all" | "simplified"): void {
+  const narrow = w < 520;
+  const top = h - (narrow ? 168 : 118);
+  ctx.fillStyle = "rgba(8, 22, 28, 0.28)";
+  ctx.fillRect(0, top, w, h - top);
+  const items = [
+    { id: "h3o", caption: "H₃O⁺" },
+    { id: "oh", caption: "OH⁻" },
+    { id: "h2co3", caption: "H₂CO₃" },
+    { id: "hco3", caption: "HCO₃⁻" },
+  ] as const;
+  items.forEach((item, index) => {
+    const col = narrow ? index % 2 : index;
+    const row = narrow ? Math.floor(index / 2) : 0;
+    const cols = narrow ? 2 : 4;
+    const x = ((col + 0.5) / cols) * w;
+    const y = top + (narrow ? 36 + row * 72 : 40);
+    drawMolecule(ctx, item.id, x, y, { scale: narrow ? 0.62 : 0.7, mode: detail, caption: item.caption });
+  });
+}

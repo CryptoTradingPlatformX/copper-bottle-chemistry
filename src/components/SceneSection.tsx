@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { AtomDetail } from "../viz/molecules";
 import type { SceneContent } from "../content/scenes";
 import { SCENES } from "../content/scenes";
 import { SceneEquations } from "./Equation";
@@ -11,9 +12,10 @@ interface Props {
   scene: SceneContent;
   index: number;
   reduced: boolean;
+  detail: AtomDetail;
 }
 
-export function SceneSection({ scene, index, reduced }: Props) {
+export function SceneSection({ scene, index, reduced, detail }: Props) {
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(!reduced);
   const [sloshed, setSloshed] = useState(false);
@@ -96,6 +98,7 @@ export function SceneSection({ scene, index, reduced }: Props) {
         sloshed={sloshed}
         acidic={step >= 2 && acidic}
         hours={step >= 2 ? hours : 0}
+        detail={detail}
         label={`${scene.title}. ${current.title}. ${current.caption}`}
       />
       <div className="controls" role="group" aria-label={`${scene.title} playback`}>

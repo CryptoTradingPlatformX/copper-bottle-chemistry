@@ -1,4 +1,5 @@
 import { illustrativeCopperMgPerL } from "../lib/chemistry";
+import { HYDRATION_LIGANDS } from "./molecules";
 import { COLORS, drawAtom, drawWater, halo, labelPill, letter } from "./draw";
 import { bob, type Viz } from "./types";
 
@@ -64,17 +65,17 @@ export const leachingViz: Viz<LeachState> = {
         };
       }).sort((a, b) => a.z - b.z);
 
-      for (const water of placed) {
+      for (const water of placed.slice(0, HYDRATION_LIGANDS)) {
         if (water.z > -0.05) continue;
-        drawWater(ctx, water.x, water.y, water.out, 0.62 * water.scale + 0.25);
+        drawWater(ctx, water.x, water.y, water.out, Math.max(0.82, 0.55 + water.scale * 0.45));
       }
       halo(ctx, cx, cy, 26, "rgba(120, 190, 230, 0.25)");
       drawAtom(ctx, cx, cy, 18, COLORS.ion);
       letter(ctx, cx, cy, "Cu", "#f5fbff", 11);
       letter(ctx, cx + 18, cy - 16, "2+", "#f5fbff", 13);
-      for (const water of placed) {
+      for (const water of placed.slice(0, HYDRATION_LIGANDS)) {
         if (water.z <= -0.05) continue;
-        drawWater(ctx, water.x, water.y, water.out, 0.62 * water.scale + 0.25);
+        drawWater(ctx, water.x, water.y, water.out, Math.max(0.82, 0.55 + water.scale * 0.45));
       }
       if (step >= 1) labelPill(ctx, cx, cy + reach + 28, "Oxygen points inward", { w, h });
     } else {

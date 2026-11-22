@@ -1,4 +1,4 @@
-import { COLORS, drawAtom, drawCO2, drawOxygen, drawWater, labelPill, letter, microscope } from "./draw";
+import { COLORS, drawAtom, drawCO2, drawMolecule, drawOxygen, drawWater, labelPill, letter, microscope } from "./draw";
 import { bob, progress, type Viz } from "./types";
 
 interface OxState {
@@ -94,12 +94,10 @@ export const oxidationViz: Viz<OxState> = {
     }
 
     if (step >= 3) {
-      drawWater(ctx, w * 0.16, h * 0.16, 0.2, 0.72);
-      drawAtom(ctx, w * 0.16 + 20, h * 0.1, 7, COLORS.h);
-      letter(ctx, w * 0.16 + 20, h * 0.1, "H", "#3a342e", 8);
-      labelPill(ctx, w * 0.18, h * 0.28, "A little H⁺ from water", { w, h });
-      drawCO2(ctx, w * 0.82, h * 0.16, 0.1, 0.7);
-      labelPill(ctx, w * 0.78, h * 0.28, "CO₂ makes a weak acid", { w, h });
+      drawMolecule(ctx, "h3o", w * 0.16, h * 0.16, { scale: w < 520 ? 0.55 : 0.68, mode: input.detail, caption: "H₃O⁺" });
+      drawMolecule(ctx, "oh", w * 0.16, h * 0.4, { scale: w < 520 ? 0.62 : 0.75, mode: input.detail, caption: "OH⁻" });
+      drawCO2(ctx, w * 0.84, h * 0.16, 0.1, 0.62);
+      labelPill(ctx, w * 0.8, h * 0.32, "CO₂ makes a weak acid", { w, h });
       if (film > 0.4) labelPill(ctx, w * 0.5, surface - 28, "Oxide film on the metal", { w, h });
     } else if (step === 0) {
       labelPill(ctx, w * 0.5, 22, "Dissolved oxygen reaches copper", { w, h });

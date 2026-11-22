@@ -1,4 +1,4 @@
-import { COLORS, drawAtom, drawCO2, drawOxygen, drawWater, labelPill, letter, roundRect } from "./draw";
+import { COLORS, drawAtom, drawCO2, drawMolecule, drawOxygen, drawWater, labelPill, letter, roundRect } from "./draw";
 import { progress, type Viz } from "./types";
 
 interface TarnishState {
@@ -73,9 +73,14 @@ export const tarnishViz: Viz<TarnishState> = {
       labelPill(ctx, w * 0.42, h * 0.12, "CuO, black", { w, h });
     }
     if (step >= 3) {
-      drawCO2(ctx, w * 0.32, stackTop - 36, 0.2, 0.65);
-      drawWater(ctx, w * 0.52, stackTop - 30, 1, 0.65);
-      labelPill(ctx, w * 0.42, h * 0.1, "Green Cu₂(OH)₂CO₃", { w, h });
+      drawCO2(ctx, w * 0.16, Math.max(28, stackTop - 78), 0.4, 0.5);
+      drawWater(ctx, w * 0.16, Math.max(78, stackTop - 36), 0.2, 0.55);
+      drawMolecule(ctx, "patina", w * 0.42, Math.max(78, stackTop - 46), {
+        scale: w < 520 ? 0.48 : 0.58,
+        mode: input.detail,
+        caption: "Cu₂(OH)₂CO₃",
+        ink: "dark",
+      });
     }
 
     const swatch = (y: number, color: string, text: string, on: boolean) => {

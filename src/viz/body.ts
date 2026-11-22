@@ -1,4 +1,4 @@
-import { COLORS, drawAtom, labelPill, letter, roundRect } from "./draw";
+import { COLORS, drawAtom, drawMolecule, labelPill, letter, roundRect } from "./draw";
 import { bob, type Viz } from "./types";
 
 interface BodyState {
@@ -29,10 +29,11 @@ export const bodyViz: Viz<BodyState> = {
       { title: "Ceruloplasmin", sub: "carries it in blood" },
       { title: step >= 2 ? "Enzymes, then bile" : "Enzymes", sub: step >= 2 ? "energy, SOD1, extra out" : "where the body uses it" },
     ];
+    const reserve = step >= 2 ? (wide ? 0 : 108) : 0;
     const cardW = Math.min(wide ? 180 : w - 48, 240);
-    const cardH = wide ? 78 : Math.max(58, (h - 36) / 4 - 8);
+    const cardH = wide ? 78 : Math.max(48, (h - 28 - reserve) / 4 - 8);
     const spots = wide
-      ? cards.map((_, index) => ({ x: w * (0.14 + index * 0.24), y: h * 0.52 }))
+      ? cards.map((_, index) => ({ x: w * (0.14 + index * 0.24), y: h * (step >= 2 ? 0.4 : 0.52) }))
       : cards.map((_, index) => ({ x: w * 0.5, y: 12 + cardH / 2 + index * (cardH + 8) }));
 
     const hot = (index: number) => (step === 0 ? index === 0 : step === 1 ? index === 1 || index === 2 : index === 3);
@@ -71,6 +72,18 @@ export const bodyViz: Viz<BodyState> = {
     }
     if (step === 0 && wide) {
       labelPill(ctx, w * 0.14, h * 0.18, "A bottle adds a little beside food", { w, h });
+    }
+    if (step >= 2) {
+      const scale = wide ? 0.62 : 0.55;
+      const y = wide ? h * 0.78 : h - 58;
+      const row = [
+        { id: "h2o2", caption: "H₂O₂", x: 0.2 },
+        { id: "h2o", caption: "H₂O", x: 0.5 },
+        { id: "superoxide", caption: "O₂•⁻", x: 0.8 },
+      ] as const;
+      for (const item of row) {
+        drawMolecule(ctx, item.id, w * item.x, y, { scale, mode: input.detail, caption: item.caption, ink: "dark" });
+      }
     }
   },
 };

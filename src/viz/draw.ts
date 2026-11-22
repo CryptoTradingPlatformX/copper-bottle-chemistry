@@ -1,3 +1,12 @@
+import {
+  MOLECULES,
+  rotate,
+  visibleAtoms,
+  visibleBonds,
+  type AtomDetail,
+  type AtomElement,
+} from "./molecules";
+
 export const COLORS = {
   cu: "#e39b5b",
   cuDeep: "#a85a32",
@@ -153,6 +162,99 @@ export function waterSites(x: number, y: number, angle: number, scale: number) {
   };
 }
 
+const ATOM_FILL: Record<AtomElement, string> = {
+  H: COLORS.h,
+  O: COLORS.o,
+  C: COLORS.c,
+  Cu: COLORS.cu,
+  Cl: COLORS.cl,
+};
+
+const ATOM_INK: Record<AtomElement, string> = {
+  H: "#3a342e",
+  O: "#fffaf6",
+  C: "#fffaf6",
+  Cu: "#3a2416",
+  Cl: "#10241c",
+};
+
+const ATOM_RADIUS: Record<AtomElement, number> = {
+  H: 6.6,
+  O: 10.5,
+  C: 10.5,
+  Cu: 12,
+  Cl: 10,
+};
+
+export function drawMolecule(
+  ctx: CanvasRenderingContext2D,
+  id: string,
+  x: number,
+  y: number,
+  options?: { scale?: number; angle?: number; mode?: AtomDetail; caption?: string; ink?: "light" | "dark" },
+): void {
+  const scale = options?.scale ?? 1;
+  const angle = options?.angle ?? 0;
+  const mode = options?.mode ?? "all";
+  const sketch = MOLECULES[id];
+  if (!sketch) return;
+  const atoms = visibleAtoms(id, mode).map((atom) => {
+    const point = rotate(atom.x, atom.y, angle);
+    return { ...atom, x: x + point.x * scale, y: y + point.y * scale };
+  });
+  const byId = new Map(atoms.map((atom) => [atom.id, atom]));
+  for (const link of visibleBonds(id, mode)) {
+    const from = byId.get(link.a);
+    const to = byId.get(link.b);
+    if (!from || !to) continue;
+    if ((link.order ?? 1) === 2) doubleBond(ctx, from.x, from.y, to.x, to.y);
+    else bond(ctx, from.x, from.y, to.x, to.y, Math.max(1.6, 2.6 * scale));
+  }
+  let top = y;
+  let bottom = y;
+  let right = x;
+  for (const atom of atoms) {
+    const radius = Math.max(3.5, ATOM_RADIUS[atom.element] * scale);
+    drawAtom(ctx, atom.x, atom.y, radius, ATOM_FILL[atom.element]);
+    const compact = atom.label !== atom.element;
+    if (compact) {
+      const font = Math.max(9, Math.min(12, 11 * scale));
+      ctx.font = `700 ${font}px "Atkinson Hyperlegible", sans-serif`;
+      const width = ctx.measureText(atom.label).width + 8;
+      const height = font + 5;
+      const left = atom.x - width / 2;
+      const boxTop = atom.y + radius * 0.15;
+      ctx.fillStyle = options?.ink === "dark" ? "rgba(255,250,244,0.94)" : "rgba(16, 32, 38, 0.78)";
+      roundRect(ctx, left, boxTop, width, height, height / 2);
+      ctx.fill();
+      ctx.fillStyle = options?.ink === "dark" ? "#2a2420" : "#f7f4ee";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(atom.label, atom.x, boxTop + height / 2 + 0.5);
+      bottom = Math.max(bottom, boxTop + height);
+    } else if (radius >= 5) {
+      letter(ctx, atom.x, atom.y, atom.label, ATOM_INK[atom.element], Math.min(11, radius * 0.82));
+    }
+    top = Math.min(top, atom.y - radius);
+    bottom = Math.max(bottom, atom.y + radius);
+    right = Math.max(right, atom.x + radius);
+  }
+  if (sketch.mark) {
+    ctx.font = `700 ${Math.max(11, 13 * scale)}px "Atkinson Hyperlegible", sans-serif`;
+    ctx.fillStyle = options?.ink === "dark" ? "#6e3c24" : "#f7f4ee";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(sketch.mark, right + 1, top + 4);
+  }
+  if (options?.caption) {
+    ctx.font = `600 ${Math.max(10, 11 * Math.min(scale, 1))}px "Atkinson Hyperlegible", sans-serif`;
+    ctx.fillStyle = options.ink === "dark" ? "#3a342e" : "rgba(255,250,244,0.92)";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(options.caption, x, bottom + 4);
+  }
+}
+
 export function drawWater(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -160,17 +262,7 @@ export function drawWater(
   angle: number,
   scale = 1,
 ): void {
-  const sites = waterSites(x, y, angle, scale);
-  bond(ctx, x, y, sites.h[0].x, sites.h[0].y, 3 * scale);
-  bond(ctx, x, y, sites.h[1].x, sites.h[1].y, 3 * scale);
-  drawAtom(ctx, x, y, 10.5 * scale, COLORS.o);
-  drawAtom(ctx, sites.h[0].x, sites.h[0].y, 6.6 * scale, COLORS.h);
-  drawAtom(ctx, sites.h[1].x, sites.h[1].y, 6.6 * scale, COLORS.h);
-  if (scale > 0.8) {
-    letter(ctx, x, y, "O", "#fffaf6", 10 * scale);
-    letter(ctx, sites.h[0].x, sites.h[0].y, "H", "#3a342e", 8 * scale);
-    letter(ctx, sites.h[1].x, sites.h[1].y, "H", "#3a342e", 8 * scale);
-  }
+  drawMolecule(ctx, "h2o", x, y, { scale, angle });
 }
 
 export function drawOxygen(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, scale = 1): void {

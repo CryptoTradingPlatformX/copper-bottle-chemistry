@@ -1,4 +1,4 @@
-import { COLORS, drawAtom, labelPill, letter, microscope, roundRect } from "./draw";
+import { COLORS, drawAtom, drawMolecule, labelPill, letter, microscope, roundRect } from "./draw";
 import { bob, progress, type Viz } from "./types";
 
 interface GermState {
@@ -72,15 +72,9 @@ export const germsViz: Viz<GermState> = {
     }
 
     if (step >= 1 && u > 0.2) {
-      for (let i = 0; i < 4; i++) {
-        const x = bx + bw * 0.34 + (i % 2) * 16;
-        const y = by - 20 + i * 14;
-        ctx.fillStyle = "rgba(255, 214, 120, 0.9)";
-        ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      labelPill(ctx, w * 0.78, h * 0.22, "Reactive oxygen", { w, h });
+      const scale = w < 520 ? 0.58 : 0.7;
+      drawMolecule(ctx, "h2o2", w * 0.82, h * 0.16, { scale, mode: input.detail, caption: "H₂O₂" });
+      drawMolecule(ctx, "radical", w * 0.82, h * 0.38, { scale, mode: input.detail, caption: "•OH" });
       labelPill(ctx, w * 0.22, by, "Membrane gaps", { w, h });
       labelPill(ctx, bx + 10, by + bh * 0.42, "Enzyme bent by copper", { w, h });
     }

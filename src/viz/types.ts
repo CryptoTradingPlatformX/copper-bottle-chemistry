@@ -8,6 +8,8 @@ export interface VizInput {
   sloshed: boolean;
   acidic: boolean;
   hours: number;
+  /** All atoms draws every hydrogen. Simplified writes H onto the heavy atom as OH or CH₂. */
+  detail: "all" | "simplified";
 }
 
 export interface Viz<S> {
