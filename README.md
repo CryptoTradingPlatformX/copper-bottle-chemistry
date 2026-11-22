@@ -17,7 +17,7 @@ The pictures move in the browser. There is no backend and no API key. Pause a sc
 7. **Into your body.** RDA 0.9 mg/day, upper limit 10 mg/day, CTR1, ceruloplasmin, cytochrome c oxidase, SOD1, and exit in bile. Food is the main source. No treatment claims.
 8. **Cleaning.** Citric acid supplies H⁺ and chelates copper; chloride helps dissolve brown, black, and green films. Rinse afterward.
 
-Atom colors: copper, oxygen, hydrogen, carbon, chlorine, plus electrons.
+Every scene shows at least one balanced equation. Tap a term for a plain explanation. The sentence under the line is the reading. Atom colors: copper, oxygen, hydrogen, carbon, chlorine, plus electrons.
 
 ## Develop
 

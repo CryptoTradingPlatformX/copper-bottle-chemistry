@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { SceneContent } from "../content/scenes";
 import { SCENES } from "../content/scenes";
-import { Equation } from "./Equation";
+import { SceneEquations } from "./Equation";
 import { IntakeScale } from "./IntakeScale";
 import { LeachPanel } from "./LeachPanel";
 import { RatioNote } from "./RatioNote";
@@ -142,8 +142,8 @@ export function SceneSection({ scene, index, reduced }: Props) {
       <h3>{current.title}</h3>
       <p className="caption">{current.caption}</p>
       {current.note && <p className="note">{current.note}</p>}
+      <SceneEquations sceneId={scene.id} />
       {scene.id === "zoom" && step === 2 && <RatioNote />}
-      {scene.id === "oxidation" && <Equation />}
       {scene.id === "leach" && step >= 2 && (
         <LeachPanel
           hours={hours}

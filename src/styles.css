@@ -238,6 +238,7 @@ main {
 
 .scene {
   margin: 1rem 0.75rem;
+  min-width: 0;
   padding: 1rem 1rem 1.2rem;
   background: var(--card);
   border: 1px solid var(--line);
@@ -316,17 +317,58 @@ main {
   border-color: transparent;
 }
 
-.equation-block { margin-top: 0.8rem; }
+.equation-block {
+  margin-top: 0.9rem;
+  max-width: 100%;
+  min-width: 0;
+  scroll-margin-top: 5.25rem;
+}
 .equation-hint { color: var(--muted); font-size: 0.92rem; }
+
+.equation-item { margin-top: 0.65rem; max-width: 100%; }
+
+.equation-line {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
 
 .equation {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
-  margin: 0.45rem 0;
+  gap: 0.35rem 0.4rem;
+  margin: 0;
+  max-width: 100%;
   font-family: Fraunces, Georgia, serif;
-  font-size: 1.28rem;
+  font-size: clamp(1.02rem, 4.5vw, 1.28rem);
+  line-height: 1.25;
+}
+
+.eq-piece {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.28rem;
+  max-width: 100%;
+}
+
+.eq-op,
+.eq-count,
+.eq-arrow {
+  flex: 0 0 auto;
+}
+
+.equation-reading {
+  margin: 0.28rem 0 0;
+  font-size: 0.98rem;
+}
+
+.equation-aside {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .equation-overall { padding-top: 0.2rem; }
@@ -335,6 +377,8 @@ main {
   font: inherit;
   min-height: 44px;
   border-color: rgba(141, 78, 46, 0.35);
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .term[aria-expanded="true"] {

@@ -1,18 +1,79 @@
 import { useState } from "react";
-import { OXIDATION_TERMS } from "../content/terms";
+import {
+  SCENE_EQUATIONS,
+  SPECIES,
+  type BalancedEquation,
+  type SceneId,
+  type TermRef,
+} from "../content/equations";
 
-function Term({ id, children, open, onOpen }: { id: string; children: string; open: string | null; onOpen: (id: string) => void }) {
-  const expanded = open === id;
+function TermButton({
+  term,
+  open,
+  onToggle,
+}: {
+  term: TermRef;
+  open: string | null;
+  onToggle: (id: string) => void;
+}) {
+  const species = SPECIES[term.id];
+  const expanded = open === term.id;
   return (
-    <button type="button" className="term" aria-expanded={expanded} onClick={() => onOpen(id)}>
-      {children}
+    <button type="button" className="term" aria-expanded={expanded} onClick={() => onToggle(term.id)}>
+      {term.label ?? species.label}
     </button>
   );
 }
 
-export function Equation() {
-  const [open, setOpen] = useState<string | null>("h");
-  const info = OXIDATION_TERMS.find((term) => term.id === open);
+function Side({
+  terms,
+  open,
+  onToggle,
+}: {
+  terms: TermRef[];
+  open: string | null;
+  onToggle: (id: string) => void;
+}) {
+  return terms.map((term, index) => (
+    <span className="eq-piece" key={`${term.id}-${term.label ?? ""}-${index}`}>
+      {index > 0 && <span className="eq-op">+</span>}
+      {(term.count ?? 1) > 1 && <span className="eq-count">{term.count}</span>}
+      <TermButton term={term} open={open} onToggle={onToggle} />
+    </span>
+  ));
+}
+
+function EquationLine({
+  equation,
+  open,
+  onToggle,
+}: {
+  equation: BalancedEquation;
+  open: string | null;
+  onToggle: (id: string) => void;
+}) {
+  return (
+    <div className="equation-item">
+      <div className="equation-line">
+        <div className="equation" role="group" aria-label={equation.reading}>
+          <Side terms={equation.left} open={open} onToggle={onToggle} />
+          <span className="eq-arrow" aria-hidden="true">
+            {equation.reversible ? "⇌" : "→"}
+          </span>
+          <Side terms={equation.right} open={open} onToggle={onToggle} />
+          {equation.suffix && <span className="eq-times">{equation.suffix}</span>}
+        </div>
+      </div>
+      <p className="equation-reading">{equation.reading}</p>
+      {equation.aside && <p className="equation-aside">{equation.aside}</p>}
+    </div>
+  );
+}
+
+export function SceneEquations({ sceneId }: { sceneId: SceneId }) {
+  const equations = SCENE_EQUATIONS[sceneId];
+  const [open, setOpen] = useState<string | null>(null);
+  const info = open ? SPECIES[open] : undefined;
 
   function toggle(id: string) {
     setOpen((current) => (current === id ? null : id));
@@ -20,36 +81,10 @@ export function Equation() {
 
   return (
     <div className="equation-block">
-      <p className="equation-hint">Tap a term. The same word means the same thing in every line.</p>
-      <p className="equation" aria-label="First half-reaction, done twice">
-        <Term id="cu" open={open} onOpen={toggle}>Cu</Term>
-        <span aria-hidden="true">→</span>
-        <Term id="cu2" open={open} onOpen={toggle}>Cu²⁺</Term>
-        <span>+ 2</span>
-        <Term id="e" open={open} onOpen={toggle}>e⁻</Term>
-        <span className="eq-times">twice</span>
-      </p>
-      <p className="equation" aria-label="Second half-reaction">
-        <Term id="o2" open={open} onOpen={toggle}>O₂</Term>
-        <span>+ 4</span>
-        <Term id="h" open={open} onOpen={toggle}>H⁺</Term>
-        <span>+ 4</span>
-        <Term id="e" open={open} onOpen={toggle}>e⁻</Term>
-        <span aria-hidden="true">→ 2</span>
-        <Term id="h2o" open={open} onOpen={toggle}>H₂O</Term>
-      </p>
-      <p className="equation equation-overall" aria-label="Overall reaction">
-        <span>2</span>
-        <Term id="cu" open={open} onOpen={toggle}>Cu</Term>
-        <span>+</span>
-        <Term id="o2" open={open} onOpen={toggle}>O₂</Term>
-        <span>+ 4</span>
-        <Term id="h" open={open} onOpen={toggle}>H⁺</Term>
-        <span aria-hidden="true">→ 2</span>
-        <Term id="cu2" open={open} onOpen={toggle}>Cu²⁺</Term>
-        <span>+ 2</span>
-        <Term id="h2o" open={open} onOpen={toggle}>H₂O</Term>
-      </p>
+      <p className="equation-hint">Tap a term. The sentence under each line is the plain reading.</p>
+      {equations.map((equation) => (
+        <EquationLine key={equation.id} equation={equation} open={open} onToggle={toggle} />
+      ))}
       {info && (
         <p className="explain" role="region">
           <strong>{info.label}.</strong> {info.plain}
